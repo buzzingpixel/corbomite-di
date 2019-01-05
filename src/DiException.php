@@ -3,6 +3,12 @@ declare(strict_types=1);
 
 namespace corbomite\di;
 
+/**
+ * @author TJ Draper <tj@buzzingpixel.com>
+ * @copyright 2019 BuzzingPixel, LLC
+ * @license Apache-2.0
+ */
+
 use Exception;
 use Throwable;
 
