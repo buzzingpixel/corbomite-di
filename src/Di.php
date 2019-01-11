@@ -9,10 +9,10 @@ declare(strict_types=1);
 
 namespace corbomite\di;
 
-use Exception;
+use Throwable;
 use DI\Container;
 use DI\ContainerBuilder;
-use Composer\Console\Application;
+use corbomite\configcollector\Factory;
 
 class Di
 {
@@ -32,75 +32,16 @@ class Di
             self::$diContainer = (new ContainerBuilder())
                 ->useAutowiring(false)
                 ->useAnnotations(false)
-                ->addDefinitions(self::getDiConfig())
+                ->addDefinitions(
+                    Factory::collector()->collect('diConfigFilePath')
+                )
                 ->build();
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             $msg = 'Unable to build Dependency Injection Container';
             throw new DiException($msg, 500, $e);
         }
 
         return self::$diContainer;
-    }
-
-    /**
-     * @throws Exception
-     */
-    private static function getDiConfig(): array
-    {
-        if (! defined('APP_BASE_PATH')) {
-            throw new Exception('APP_BASE_PATH must be defined');
-        }
-
-        // Edge case and weirdness with composer
-        getenv('HOME') || putenv('HOME=' . __DIR__);
-
-        $oldCwd = getcwd();
-
-        $diConfig = [];
-
-        chdir(APP_BASE_PATH);
-
-        $appJsonPath = APP_BASE_PATH . DIRECTORY_SEPARATOR . 'composer.json';
-
-        if (file_exists($appJsonPath)) {
-            $appJson = json_decode(file_get_contents($appJsonPath), true);
-            $configFilePath = $appJson['extra']['diConfigFilePath'] ?? null;
-
-            if ($configFilePath &&
-                file_exists($configFilePath)
-            ) {
-                $configInclude = include APP_BASE_PATH . '/' . $configFilePath;
-                $diConfig = \is_array($configInclude) ? $configInclude : [];
-            }
-        }
-
-        $composerApp = new Application();
-
-        /** @noinspection PhpUnhandledExceptionInspection */
-        $composer = $composerApp->getComposer();
-        $repositoryManager = $composer->getRepositoryManager();
-        $installedFilesystemRepository = $repositoryManager->getLocalRepository();
-        $packages = $installedFilesystemRepository->getCanonicalPackages();
-
-        foreach ($packages as $package) {
-            $extra = $package->getExtra();
-
-            $configFilePath = APP_BASE_PATH .
-                '/vendor/' .
-                $package->getName() .
-                '/' .
-                ($extra['diConfigFilePath'] ?? 'asdf');
-
-            if (file_exists($configFilePath)) {
-                $configInclude = include $configFilePath;
-                $config = \is_array($configInclude) ? $configInclude : [];
-                $diConfig = array_merge($diConfig, $config);
-            }
-        }
-
-        chdir($oldCwd);
-
-        return $diConfig;
     }
 
     /**
@@ -120,7 +61,7 @@ class Di
     {
         try {
             return self::diContainer()->get($def);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             $msg = 'Unable to get dependency';
             throw new DiException($msg, 500, $e);
         }
@@ -144,7 +85,7 @@ class Di
     {
         try {
             return self::diContainer()->make($def);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             $msg = 'Unable to make dependency';
             throw new DiException($msg, 500, $e);
         }
@@ -167,7 +108,7 @@ class Di
     {
         try {
             return self::diContainer()->has($def);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             $msg = 'Unable to check if container has dependency';
             throw new DiException($msg, 500, $e);
         }

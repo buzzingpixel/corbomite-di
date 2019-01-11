@@ -1,14 +1,14 @@
 {
     "name": "buzzingpixel/corbomite-di",
     "description": "Corbomite DI",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "license": "Apache-2.0",
     "homepage": "https://buzzingpixel.com/",
     "require": {
         "php": ">=7.2",
         "ext-json": "*",
         "php-di/php-di": "^6.0",
-        "composer/composer": "^1.8"
+        "buzzingpixel/corbomite-config-collector": "^1.0.1"
     },
     "require-dev": {
         "roave/security-advisories": "dev-master",
