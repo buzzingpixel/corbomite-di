@@ -20,6 +20,7 @@ class Di
     private static $diContainer;
 
     /**
+     * Gets the DI container. Builds DI container if it hasn't been built yet
      * @throws DiException
      */
     public static function diContainer(): Container
@@ -28,7 +29,34 @@ class Di
             return self::$diContainer;
         }
 
+        self::build();
+
+        return self::$diContainer;
+    }
+
+    /**
+     * Gets the DI container. Builds DI container if it hasn't been built yet
+     * @throws DiException
+     */
+    public function getDiContainer(): Container
+    {
+        return self::diContainer();
+    }
+
+    /**
+     * Builds the container. You probably shouldn't call this during normal
+     * application execution
+     * @param array $definitions
+     * @throws DiException
+     */
+    public static function build(array $definitions = []): void
+    {
         try {
+            $definitions = array_merge(
+                Factory::collector()->collect('diConfigFilePath'),
+                $definitions
+            );
+
             self::$diContainer = (new ContainerBuilder())
                 ->useAutowiring(
                     getenv('CORBOMITE_DI_USE_AUTO_WIRING') === 'true'
@@ -36,24 +64,23 @@ class Di
                 ->useAnnotations(
                     getenv('CORBOMITE_DI_USE_ANNOTATIONS') === 'true'
                 )
-                ->addDefinitions(
-                    Factory::collector()->collect('diConfigFilePath')
-                )
+                ->addDefinitions($definitions)
                 ->build();
         } catch (Throwable $e) {
             $msg = 'Unable to build Dependency Injection Container';
             throw new DiException($msg, 500, $e);
         }
-
-        return self::$diContainer;
     }
 
     /**
+     * Builds the container. You probably shouldn't call this during normal
+     * application execution
+     * @param array $definitions
      * @throws DiException
      */
-    public function getDiContainer(): Container
+    public function buildContainer(array $definitions = []): void
     {
-        return self::diContainer();
+        self::build($definitions);
     }
 
     /**
