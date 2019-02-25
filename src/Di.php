@@ -30,8 +30,12 @@ class Di
 
         try {
             self::$diContainer = (new ContainerBuilder())
-                ->useAutowiring(false)
-                ->useAnnotations(false)
+                ->useAutowiring(
+                    getenv('CORBOMITE_DI_USE_AUTO_WIRING') === 'true'
+                )
+                ->useAnnotations(
+                    getenv('CORBOMITE_DI_USE_ANNOTATIONS') === 'true'
+                )
                 ->addDefinitions(
                     Factory::collector()->collect('diConfigFilePath')
                 )
@@ -55,6 +59,8 @@ class Di
     /**
      * Resolves a dependency (if a dependency has already been resolved, then
      * that same instance of the dependency will be returned)
+     * @param string $def
+     * @return mixed
      * @throws DiException
      */
     public static function get(string $def)
@@ -70,6 +76,8 @@ class Di
     /**
      * Resolves a dependency (if a dependency has already been resolved, then
      * that same instance of the dependency will be returned)
+     * @param string $def
+     * @return mixed
      * @throws DiException
      */
     public function getFromDefinition(string $def)
@@ -79,6 +87,8 @@ class Di
 
     /**
      * Resolves a dependency with a new instance of that dependency every time
+     * @param string $def
+     * @return mixed
      * @throws DiException
      */
     public static function make(string $def)
@@ -93,6 +103,8 @@ class Di
 
     /**
      * Resolves a dependency with a new instance of that dependency every time
+     * @param string $def
+     * @return mixed
      * @throws DiException
      */
     public function makeFromDefinition(string $def)
@@ -102,9 +114,11 @@ class Di
 
     /**
      * Checks if the DI has a dependency definition
+     * @param string $def
+     * @return bool
      * @throws DiException
      */
-    public static function has(string $def)
+    public static function has(string $def): ?bool
     {
         try {
             return self::diContainer()->has($def);
@@ -116,9 +130,11 @@ class Di
 
     /**
      * Checks if the DI has a dependency definition
+     * @param string $def
+     * @return bool
      * @throws DiException
      */
-    public function hasDefinition(string $def)
+    public function hasDefinition(string $def): ?bool
     {
         return self::has($def);
     }
