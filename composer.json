@@ -1,19 +1,19 @@
 {
     "name": "buzzingpixel/corbomite-di",
     "description": "Corbomite DI",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "license": "Apache-2.0",
     "homepage": "https://buzzingpixel.com/",
     "require": {
         "php": ">=7.2",
         "ext-json": "*",
-        "php-di/php-di": "^6.0",
-        "buzzingpixel/corbomite-config-collector": "^1.1"
+        "buzzingpixel/corbomite-config-collector": "^1.1",
+        "php-di/php-di": "^6.0"
     },
     "require-dev": {
+        "phpmd/phpmd": "^2.6",
         "roave/security-advisories": "dev-master",
-        "squizlabs/php_codesniffer": "^3.4",
-        "phpmd/phpmd": "^2.6"
+        "squizlabs/php_codesniffer": "^3.4"
     },
     "autoload": {
         "psr-4": {
@@ -21,6 +21,8 @@
         }
     },
     "config": {
-        "optimize-autoloader": true
+        "bin-compat": "full",
+        "optimize-autoloader": true,
+        "sort-packages": true
     }
 }
