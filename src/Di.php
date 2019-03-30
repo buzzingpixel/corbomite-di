@@ -89,6 +89,7 @@ class Di
      * @param string $def
      * @return mixed
      * @throws DiException
+     * @deprecated Just get the PHP-DI container and use that why did I even do this?
      */
     public static function get(string $def)
     {
@@ -106,6 +107,7 @@ class Di
      * @param string $def
      * @return mixed
      * @throws DiException
+     * @deprecated Just get the PHP-DI container and use that why did I even do this?
      */
     public function getFromDefinition(string $def)
     {
@@ -117,6 +119,7 @@ class Di
      * @param string $def
      * @return mixed
      * @throws DiException
+     * @deprecated Just get the PHP-DI container and use that why did I even do this?
      */
     public static function make(string $def)
     {
@@ -133,6 +136,7 @@ class Di
      * @param string $def
      * @return mixed
      * @throws DiException
+     * @deprecated Just get the PHP-DI container and use that why did I even do this?
      */
     public function makeFromDefinition(string $def)
     {
@@ -144,6 +148,7 @@ class Di
      * @param string $def
      * @return bool
      * @throws DiException
+     * @deprecated Just get the PHP-DI container and use that why did I even do this?
      */
     public static function has(string $def): ?bool
     {
@@ -160,6 +165,7 @@ class Di
      * @param string $def
      * @return bool
      * @throws DiException
+     * @deprecated Just get the PHP-DI container and use that why did I even do this?
      */
     public function hasDefinition(string $def): ?bool
     {
