@@ -2,11 +2,13 @@
 
 Part of BuzzingPixel's Corbomite project.
 
-Provides a light wrapper around PHP-DI to make available to Corbomite. Per BuzzingPixel's preferred practice of being explicit in defining dependencies, auto wiring and annotations are disabled.
-
 ### Configuration
 
-As mentioned above, you are required to write the definitions to be injected. Your app, or any composer package can register a config file to load in `composer.json`s `extra` object with the key `diConfigFilePath`.
+Configuration can be provided in your project's `composer.json` extra key, or in some cases with environment variables.
+
+#### `diConfigFilePath`
+
+Your app, or any composer package can register a config file to load in `composer.json`s `extra` object with the key `diConfigFilePath`.
 
 ```json
 {
@@ -40,6 +42,34 @@ return [
     },
 ];
 ```
+
+#### `corbomiteDiConfig.useAutoWiring`
+
+`false` by default for backwards compatibility reasons. The next major version will enable this by default. Optionally set with environment variable: `putenv('CORBOMITE_DI_USE_AUTO_WIRING=true')`
+
+#### `corbomiteDiConfig.useAnnotations`
+
+`false` by default for backwards compatibility reasons. The next major version will enable this by default. Optionally set with environment variable: `putenv('CORBOMITE_DI_USE_ANNOTATIONS=true')`
+
+#### `corbomiteDiConfig.ignorePhpDocErrors`
+
+`false` by default. Optionally set with environment variable: `putenv('CORBOMITE_DI_IGNORE_PHPDOC_ERRORS=true')`
+
+#### `corbomiteDiConfig.compileTo`
+
+Set the path relative to your project's `composer.json`. Optionally set with environment variable (note when using environment variable this must be a full path and not relative): `putenv('CORBOMITE_DI_COMPILATION_DIR=/path/to/directory')`
+
+#### `corbomiteDiConfig.writeProxiesTo`
+
+Set the path relative to your project's `composer.json`. Optionally set with environment variable (note when using environment variable this must be a full path and not relative): `putenv('CORBOMITE_DI_WRITE_PROXIES_TO_FILE=/path/to/directory')`
+
+#### `CORBOMITE_DI_ENABLE_COMPILATION` environment variable
+
+In your production environment you'll want to set this to `true` and make sure `corbomiteDiConfig.compileTo` has a valid path.
+
+#### `CORBOMITE_DI_ENABLE_WRITING_PROXIES` environment variable
+
+In your production environment you'll want to set this to `true` and make sure `corbomiteDiConfig.writeProxiesTo` has a valid path.
 
 ## Di's Class Methods
 

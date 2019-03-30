@@ -11,7 +11,9 @@ namespace corbomite\di;
 
 use Throwable;
 use DI\Container;
+use ReflectionClass;
 use DI\ContainerBuilder;
+use Composer\Autoload\ClassLoader;
 use corbomite\configcollector\Factory;
 
 class Di
@@ -52,20 +54,66 @@ class Di
     public static function build(array $definitions = []): void
     {
         try {
+            $collector = Factory::collector();
+
+            $config = $collector->getExtraKeyAsArray('corbomiteDiConfig');
+            $config = \is_array($config) ? $config : [];
+
+            $useAutoWiring = $config['useAutoWiring'] ?? getenv('CORBOMITE_DI_USE_AUTO_WIRING') === 'true';
+
+            $useAnnotations = $config['useAnnotations'] ?? getenv('CORBOMITE_DI_USE_ANNOTATIONS') === 'true';
+
+            $ignorePhpDocErrors = $config['ignorePhpDocErrors'] ??
+                getenv('CORBOMITE_DI_IGNORE_PHPDOC_ERRORS') === 'true';
+
+            $enableCompilation = getenv('CORBOMITE_DI_ENABLE_COMPILATION') === 'true';
+
+            $compileTo = $config['compileTo'] ?? false;
+
+            if ($compileTo) {
+                $compileTo = self::getAppBasePath() . DIRECTORY_SEPARATOR . $compileTo;
+            }
+
+            if (! $compileTo) {
+                $compileTo = getenv('CORBOMITE_DI_COMPILATION_DIR');
+            }
+
+            $enableWritingProxies = getenv('CORBOMITE_DI_ENABLE_WRITING_PROXIES') === 'true';
+
+            $writeProxiesToFile = $config['writeProxiesTo'] ?? false;
+
+            if ($writeProxiesToFile) {
+                $writeProxiesToFile = self::getAppBasePath() . DIRECTORY_SEPARATOR . $writeProxiesToFile;
+            }
+
+            if (! $writeProxiesToFile) {
+                $writeProxiesToFile = getenv('CORBOMITE_DI_WRITE_PROXIES_TO_FILE');
+            }
+
             $definitions = array_merge(
-                Factory::collector()->collect('diConfigFilePath'),
+                $collector->collect('diConfigFilePath'),
                 $definitions
             );
 
-            self::$diContainer = (new ContainerBuilder())
-                ->useAutowiring(
-                    getenv('CORBOMITE_DI_USE_AUTO_WIRING') === 'true'
-                )
-                ->useAnnotations(
-                    getenv('CORBOMITE_DI_USE_ANNOTATIONS') === 'true'
-                )
-                ->addDefinitions($definitions)
-                ->build();
+            $builder = new ContainerBuilder();
+
+            $builder->useAutowiring($useAutoWiring);
+
+            $builder->useAnnotations($useAnnotations);
+
+            $builder->ignorePhpDocErrors($ignorePhpDocErrors);
+
+            if ($enableCompilation && $compileTo) {
+                $builder->enableCompilation($compileTo);
+            }
+
+            if ($enableWritingProxies && $writeProxiesToFile) {
+                $builder->writeProxiesToFile(true, $writeProxiesToFile);
+            }
+
+            $builder->addDefinitions($definitions);
+
+            self::$diContainer = $builder->build();
         } catch (Throwable $e) {
             $msg = 'Unable to build Dependency Injection Container';
             throw new DiException($msg, 500, $e);
@@ -170,5 +218,26 @@ class Di
     public function hasDefinition(string $def): ?bool
     {
         return self::has($def);
+    }
+
+    private static $appBasePath = '';
+
+    private static function getAppBasePath(): string
+    {
+        if (self::$appBasePath) {
+            return self::$appBasePath;
+        }
+
+        if (defined('APP_BASE_PATH')) {
+            self::$appBasePath = APP_BASE_PATH;
+            return self::$appBasePath;
+        }
+
+        /** @noinspection PhpUnhandledExceptionInspection */
+        $reflection = new ReflectionClass(ClassLoader::class);
+
+        self::$appBasePath = dirname($reflection->getFileName(), 3);
+
+        return self::$appBasePath;
     }
 }
