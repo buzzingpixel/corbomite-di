@@ -47,6 +47,10 @@ return [
 
 Gets the configured instance of PHP-DI. You probably shouldn't ever need to use this.
 
+### `build()` (static) or `buildContainer()` (non-static)
+
+Allows you to build the container, perhaps in your front controller, sending any additional definitions you want to directly.
+
 ## License
 
 Copyright 2019 BuzzingPixel, LLC
